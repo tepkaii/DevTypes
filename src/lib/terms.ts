@@ -445,6 +445,13 @@ export const devTerms: Term[] = [
     definition: "The process of setting up or preparing something before use",
     category: "General",
   },
+  {
+    id: "67",
+    term: "deploy",
+    definition:
+      "The process of publishing and making an application or website available for users on the internet or a server",
+    category: "General",
+  },
 ];
 export const categories = [
   "All",
