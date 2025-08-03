@@ -453,6 +453,7 @@ export const categories = [
   "Frontend",
   "Backend",
   "Interview",
+  "General",
 ];
 
 // Common words to mix with dev terms
