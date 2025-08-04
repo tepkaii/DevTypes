@@ -141,7 +141,7 @@ const TypingArea: React.FC<TypingAreaProps> = ({
       );
     }
 
-    const targetWord = word.word.toLowerCase();
+    // const targetWord = word.word.toLowerCase();
     const userInput = currentInput.toLowerCase();
     const chars = word.word.split("");
 
@@ -190,7 +190,7 @@ const TypingArea: React.FC<TypingAreaProps> = ({
     if (!currentWord || !currentInput) return null;
 
     const targetWord = currentWord.word.toLowerCase();
-    const userInput = currentInput.toLowerCase();
+    // const userInput = currentInput.toLowerCase();
     const chars = currentInput.split("");
 
     return (
