@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Play, Pause } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import TypingArea from "./TypingArea";
 import StatsPanel from "./StatsPanel";
 import type { SessionDuration, Stats, Term, WordItem } from "@/lib/types";
 import { SentenceGenerator } from "@/lib/sentenceGenerator";
+import { PauseSolid, PlaySolid } from "iconoir-react";
 
 interface PracticeViewProps {
   terms: Term[];
@@ -25,6 +26,8 @@ const PracticeView: React.FC<PracticeViewProps> = ({
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [sessionStarted, setSessionStarted] = useState(false);
+  const [sessionCompleted, setSessionCompleted] = useState(false);
+  const [usedTerms, setUsedTerms] = useState<Term[]>([]);
   const [stats, setStats] = useState<Stats>({
     wpm: 0,
     accuracy: 100,
@@ -50,6 +53,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({
           const newTimeRemaining = prev.timeRemaining - 1;
           if (newTimeRemaining <= 0) {
             setIsSessionActive(false);
+            setSessionCompleted(true);
             return { ...prev, timeRemaining: 0 };
           }
           return { ...prev, timeRemaining: newTimeRemaining };
@@ -96,6 +100,8 @@ const PracticeView: React.FC<PracticeViewProps> = ({
   const resetSession = () => {
     setIsSessionActive(false);
     setSessionStarted(false);
+    setSessionCompleted(false);
+    setUsedTerms([]);
     setStats({
       wpm: 0,
       accuracy: 100,
@@ -122,6 +128,22 @@ const PracticeView: React.FC<PracticeViewProps> = ({
           : word
       )
     );
+
+    // Track used terms
+    const completedWord = currentWords[wordIndex];
+    if (completedWord.isDevTerm && completedWord.definition) {
+      const term: Term = {
+        id: completedWord.id,
+        term: completedWord.word,
+        definition: completedWord.definition,
+        category: category,
+      };
+
+      setUsedTerms((prev) => {
+        const exists = prev.some((t) => t.term === term.term);
+        return exists ? prev : [...prev, term];
+      });
+    }
 
     // Update stats
     setStats((prev) => ({
@@ -150,7 +172,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -170,19 +192,19 @@ const PracticeView: React.FC<PracticeViewProps> = ({
                 onClick={startSession}
                 className="flex items-center gap-2"
               >
-                <Play className="h-4 w-4" />
+                <PlaySolid className="size-5 mr-2" />
                 Start Session
               </Button>
             ) : (
               <>
                 {isSessionActive ? (
                   <Button variant="outline" onClick={pauseSession}>
-                    <Pause className="h-4 w-4 mr-2" />
+                    <PauseSolid className="size-5 mr-2" />
                     Pause
                   </Button>
                 ) : stats.timeRemaining > 0 ? (
                   <Button onClick={startSession}>
-                    <Play className="h-4 w-4 mr-2" />
+                    <PlaySolid className="size-5 mr-2" />
                     Resume
                   </Button>
                 ) : null}
@@ -199,10 +221,17 @@ const PracticeView: React.FC<PracticeViewProps> = ({
           onNextWord={handleNextWord}
           onReset={resetSession}
           timeRemaining={stats.timeRemaining}
+          isSessionActive={isSessionActive}
+          sessionCompleted={sessionCompleted}
         />
 
         {/* Stats */}
-        <StatsPanel stats={stats} isSessionActive={isSessionActive} />
+        <StatsPanel
+          stats={stats}
+          isSessionActive={isSessionActive}
+          sessionCompleted={sessionCompleted}
+          usedTerms={usedTerms}
+        />
       </div>
     </div>
   );
